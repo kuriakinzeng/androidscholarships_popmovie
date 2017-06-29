@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import com.example.kuriakinzeng.popularmovies.utils.MovieListJsonUtils;
 import com.example.kuriakinzeng.popularmovies.utils.NetworkUtils;
 
 import java.io.IOException;
@@ -19,12 +21,14 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
     private ProgressBar mLoadingIndicator;
+    private TextView mErrorMessageDisplay;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
+        mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
         new FetchMovieList().execute("popular"); 
     }
 
@@ -44,8 +48,9 @@ public class MainActivity extends AppCompatActivity {
             
             try {
                 String movieListJsonResponse = NetworkUtils.getResponseFromHttpUrl(movieListUrl);
-                Log.w("Main: JSON", "JSON Response" + movieListJsonResponse);
-                return null;
+                String[] movieListData = MovieListJsonUtils.getMovieListFromJson(movieListJsonResponse);
+//                Log.w("MEH", movieListData[0]);
+                return movieListData;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -53,9 +58,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String[] strings) {
-            super.onPostExecute(strings);
+        protected void onPostExecute(String[] movieListData) {
+            super.onPostExecute(movieListData);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
+            if (movieListData != null) {
+//                showWeatherDataView();
+//                mForecastAdapter.setWeatherData(weatherData);
+            } else {
+                showErrorMessage();
+            }
         }
-    } 
+    }
+    
+    private void showErrorMessage() {
+//        mRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorMessageDisplay.setVisibility(View.VISIBLE);
+    }
+
+    private void showDataView() {
+        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+//        mRecyclerView.setVisibility(View.VISIBLE);
+    }
 }

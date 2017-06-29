@@ -1,5 +1,16 @@
 apply plugin: 'com.android.application'
 
+def getProps(String propName) { 
+    def propsFile = rootProject.file('local.properties') 
+    if (propsFile.exists()) { 
+        def props = new Properties() 
+        props.load(new FileInputStream(propsFile)) 
+        return props[propName] 
+    } else { 
+        return ""; 
+    } 
+}
+
 android {
     compileSdkVersion 26
     buildToolsVersion "26.0.0"
@@ -13,18 +24,26 @@ android {
     }
     buildTypes {
         release {
+            buildConfigField "String", "API_KEY", getProps("apikey")
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            buildConfigField "String", "API_KEY", getProps("apikey")
         }
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support:recyclerview-v7:26.+'
 }
+
+
+apply plugin: 'com.android.application'

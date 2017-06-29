@@ -1,10 +1,9 @@
 package com.example.kuriakinzeng.popularmovies.utils;
 
-import android.content.res.Resources;
 import android.net.Uri;
 import android.util.Log;
 
-import com.example.kuriakinzeng.popularmovies.R;
+import com.example.kuriakinzeng.popularmovies.BuildConfig;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +18,9 @@ public final class NetworkUtils {
     
     private static final String MOVIE_BASE_URL = "https://api.themoviedb.org/3/movie";
     private static final String API_KEY_PARAM = "api_key";
-    private static final String API_KEY = Resources.getSystem().getString(R.string.api_key);
+    private static final String API_KEY = BuildConfig.API_KEY;
+    private static final String PAGE_PARAM = "page";
+    private static final String PAGE = "1";
 
     /**
      * Builds the URL used to talk to the weather server using a location. This location is based
@@ -29,10 +30,10 @@ public final class NetworkUtils {
      * @return The URL to use to query the weather server.
      */
     public static URL buildUrl(String endpoint) {
-        Log.w("A",API_KEY);
         Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
                 .appendPath(endpoint)
                 .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                .appendQueryParameter(PAGE_PARAM, PAGE)
                 .build();
         URL url = null;
         try {
