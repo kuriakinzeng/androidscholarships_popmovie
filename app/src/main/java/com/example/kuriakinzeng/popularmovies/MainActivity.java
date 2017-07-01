@@ -3,6 +3,8 @@ package com.example.kuriakinzeng.popularmovies;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -22,6 +24,8 @@ import javax.net.ssl.HttpsURLConnection;
 public class MainActivity extends AppCompatActivity {
     private ProgressBar mLoadingIndicator;
     private TextView mErrorMessageDisplay;
+    private RecyclerView mMovieRecyclerView;
+    private MovieListAdapter mMovieListAdapter;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +33,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
+        
+        mMovieRecyclerView = (RecyclerView) findViewById(R.id.rv_movie_list);
+        GridLayoutManager layoutManager = new GridLayoutManager(this, 6);
+        mMovieRecyclerView.setLayoutManager(layoutManager);
+        mMovieListAdapter = new MovieListAdapter();
+        mMovieRecyclerView.setAdapter(mMovieListAdapter);
+        
         new FetchMovieList().execute("popular"); 
     }
 
@@ -58,12 +69,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String[] movieListData) {
-            super.onPostExecute(movieListData);
+        protected void onPostExecute(String[] movieData) {
+            super.onPostExecute(movieData);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (movieListData != null) {
-//                showWeatherDataView();
-//                mForecastAdapter.setWeatherData(weatherData);
+            if (movieData != null) {
+                showDataView();
+                mMovieListAdapter.setMovieData(movieData);
             } else {
                 showErrorMessage();
             }
@@ -71,12 +82,12 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void showErrorMessage() {
-//        mRecyclerView.setVisibility(View.INVISIBLE);
+        mMovieRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
     private void showDataView() {
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
-//        mRecyclerView.setVisibility(View.VISIBLE);
+        mMovieRecyclerView.setVisibility(View.VISIBLE);
     }
 }
