@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mErrorMessageDisplay;
     private RecyclerView mMovieRecyclerView;
     private MovieListAdapter mMovieListAdapter;
+    private static final String TAG = "Main";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
         
         mMovieRecyclerView = (RecyclerView) findViewById(R.id.rv_movie_list);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 6);
+        GridLayoutManager layoutManager = new GridLayoutManager(this, 3);
         mMovieRecyclerView.setLayoutManager(layoutManager);
         mMovieListAdapter = new MovieListAdapter();
         mMovieRecyclerView.setAdapter(mMovieListAdapter);
@@ -59,9 +60,9 @@ public class MainActivity extends AppCompatActivity {
             
             try {
                 String movieListJsonResponse = NetworkUtils.getResponseFromHttpUrl(movieListUrl);
-                String[] movieListData = MovieListJsonUtils.getMovieListFromJson(movieListJsonResponse);
-//                Log.w("MEH", movieListData[0]);
-                return movieListData;
+                String[] movieList = MovieListJsonUtils.getMovieListFromJson(movieListJsonResponse);
+//                Log.w(TAG, movieListData[0]);
+                return movieList;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -69,12 +70,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String[] movieData) {
-            super.onPostExecute(movieData);
+        protected void onPostExecute(String[] movieList) {
+            super.onPostExecute(movieList);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (movieData != null) {
+            if (movieList != null) {
                 showDataView();
-                mMovieListAdapter.setMovieData(movieData);
+                mMovieListAdapter.setMovieList(movieList);
             } else {
                 showErrorMessage();
             }

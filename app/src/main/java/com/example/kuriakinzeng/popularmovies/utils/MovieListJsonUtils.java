@@ -10,7 +10,9 @@ import org.json.JSONObject;
 
 public final class MovieListJsonUtils {
     public static String[] getMovieListFromJson(String movieListJsonString) throws JSONException {
-        final String STATUS_CODE = "status_code"; 
+        final String STATUS_CODE = "status_code";
+        final String IMAGE_BASE_PATH = "http://image.tmdb.org/t/p/";
+        final String IMAGE_SIZE = "w185";
                 
         String[] parsedMovieListData = null;
         JSONObject movieListJson = new JSONObject(movieListJsonString);
@@ -22,7 +24,10 @@ public final class MovieListJsonUtils {
         JSONArray resultsArray = movieListJson.getJSONArray("results");
         parsedMovieListData = new String[resultsArray.length()];
         for(int i = 0; i < resultsArray.length(); i++){
-            parsedMovieListData[i] = resultsArray.getString(i);
+            JSONObject movieData = resultsArray.getJSONObject(i);
+            String posterPath = movieData.getString("poster_path");
+            parsedMovieListData[i] = IMAGE_BASE_PATH + IMAGE_SIZE + posterPath;
+//            parsedMovieListData[i] = resultsArray.getString(i);
         }
         
         return parsedMovieListData;

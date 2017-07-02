@@ -7,7 +7,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 /**
  * Created by kuriakinzeng on 6/30/17.
@@ -18,14 +21,14 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
     private final static String TAG = "Adapter";
     
     private LayoutInflater mLayoutInflater;
-    private String[] mMovieData;
+    private String[] mMovieList;
     
 //    public MovieListAdapter (Context context) {
-//        
+//    
 //    }
     
-    public void setMovieData (String[] movieData) {
-        mMovieData = movieData;
+    public void setMovieList (String[] movieList) {
+        mMovieList = movieList;
         notifyDataSetChanged();
     }
 
@@ -39,24 +42,28 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
 
     @Override
     public void onBindViewHolder(MovieListAdapter.MovieHolder holder, int position) {
-        String movie = mMovieData[position];
-        Log.w(TAG, movie);
+        String movieThumbnailPath = mMovieList[position];
+//        Context context = 
+        Context context = holder.itemView.getContext();
+        Picasso.with(context).load(movieThumbnailPath).into(holder.mMovieThumbnail);
+//        Log.w(TAG, movie);
 //        holder.mMovieTitle.setText(movie);
     }
 
     @Override
     public int getItemCount() {
-        if (mMovieData == null) 
+        if (mMovieList == null) 
             return 0;
-        return mMovieData.length;
+        return mMovieList.length;
     }
     
     public class MovieHolder extends RecyclerView.ViewHolder {
-        private TextView mMovieTitle;
+//        private TextView mMovieTitle;
+        private ImageView mMovieThumbnail;
         
         public MovieHolder (View view) {
             super(view);
-            mMovieTitle = (TextView) view.findViewById(R.id.tv_movie_title);
+            mMovieThumbnail = (ImageView) view.findViewById(R.id.iv_movie_thumbnail);
         }
         
         public void bind () {
