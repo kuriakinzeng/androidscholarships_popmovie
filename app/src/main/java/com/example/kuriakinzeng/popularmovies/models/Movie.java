@@ -10,6 +10,9 @@ import java.util.List;
  */
 
 public class Movie {
+    final String IMAGE_BASE_PATH = "http://image.tmdb.org/t/p/";
+    final String IMAGE_SIZE = "w185";
+    
     @SerializedName("vote_count")
     @Expose
     private Integer voteCount;
@@ -102,7 +105,7 @@ public class Movie {
     }
 
     public String getPosterPath() {
-        return posterPath;
+        return IMAGE_BASE_PATH + IMAGE_SIZE + posterPath;
     }
 
     public void setPosterPath(String posterPath) {

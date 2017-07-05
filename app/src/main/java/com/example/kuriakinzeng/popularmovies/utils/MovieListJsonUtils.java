@@ -23,32 +23,13 @@ public final class MovieListJsonUtils {
     private static final String TAG = "JSON_UTILS";
     
     public static Movie[] getMovieListFromJson(String json) throws JSONException {
-        final String STATUS_CODE = "status_code";
-        final String IMAGE_BASE_PATH = "http://image.tmdb.org/t/p/";
-        final String IMAGE_SIZE = "w185";
-               
         Gson gson = new Gson();
         MovieContainer movieContainer = gson.fromJson(json, MovieContainer.class);
-        Log.w(TAG, movieContainer.toString());
+//        Log.w(TAG, movieContainer.toString());
         Movie[] movieList = movieContainer.getMovies();
-//        for (Movie movie : movieList) {
-//            Log.w(TAG, movie.toString());
-//        }
+        for (Movie movie : movieList) {
+            Log.w(TAG, movie.getPosterPath());
+        }
         return movieList;
-
-//        JSONObject movieListJson = new JSONObject(movieListJsonString);
-//        if (movieListJson.has(STATUS_CODE)) {
-//            return null;
-//        }
-//        
-//        JSONArray resultsArray = movieListJson.getJSONArray("results");
-//        MovieContainer movies = gson.fromJson(resultsArray, Movie[].class);
-//        for(int i = 0; i < resultsArray.length(); i++){
-//            JSONObject movieData = resultsArray.getJSONObject(i);
-//            String posterPath = movieData.getString("poster_path");
-//            movies[i] = IMAGE_BASE_PATH + IMAGE_SIZE + posterPath;
-////            movies[i] = resultsArray.getString(i);
-//        }
-//        return movies;
     }
 }
