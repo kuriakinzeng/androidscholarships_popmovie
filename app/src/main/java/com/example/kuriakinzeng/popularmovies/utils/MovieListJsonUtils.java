@@ -28,16 +28,12 @@ public final class MovieListJsonUtils {
         final String IMAGE_SIZE = "w185";
                
         Gson gson = new Gson();
-        JSONObject jsonObject = new JSONObject(json);
-        if (jsonObject.has(STATUS_CODE)) {
-            return null;
-        }
-        JSONArray resultsArray = jsonObject.getJSONArray("results");
-//        Log.w(TAG, resultsArray.toString());
-        Movie[] movieList = gson.fromJson(resultsArray.toString(), Movie[].class);
-        for (Movie movie : movieList) {
-            Log.w(TAG, movie.toString());
-        }
+        MovieContainer movieContainer = gson.fromJson(json, MovieContainer.class);
+        Log.w(TAG, movieContainer.toString());
+        Movie[] movieList = movieContainer.getMovies();
+//        for (Movie movie : movieList) {
+//            Log.w(TAG, movie.toString());
+//        }
         return movieList;
 
 //        JSONObject movieListJson = new JSONObject(movieListJsonString);

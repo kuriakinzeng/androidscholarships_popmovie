@@ -1,5 +1,9 @@
 package com.example.kuriakinzeng.popularmovies.models;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -7,13 +11,18 @@ import java.util.List;
  */
 
 public class MovieContainer {
+    @SerializedName("page")
+    @Expose
     private Integer page;
-    
+    @SerializedName("total_results")
+    @Expose
     private Integer totalResults;
-    
+    @SerializedName("total_pages")
+    @Expose
     private Integer totalPages;
-    
-    private List<Movie> movies = null;
+    @SerializedName("results")
+    @Expose
+    private Movie[] movies = null;
 
     public Integer getPage() {
         return page;
@@ -39,11 +48,21 @@ public class MovieContainer {
         this.totalPages = totalPages;
     }
 
-    public List<Movie> getMovies() {
+    public Movie[] getMovies() {
         return movies;
     }
 
-    public void setMovies(List<Movie> results) {
-        this.movies = results;
+    public void setMovies(Movie[] movies) {
+        this.movies = movies;
+    }
+
+    @Override
+    public String toString() {
+        return "MovieContainer{" +
+                "page=" + page +
+                ", totalResults=" + totalResults +
+                ", totalPages=" + totalPages +
+                ", movies=" + Arrays.toString(movies) +
+                '}';
     }
 }
