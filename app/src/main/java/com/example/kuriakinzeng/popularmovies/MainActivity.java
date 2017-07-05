@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.kuriakinzeng.popularmovies.models.Movie;
 import com.example.kuriakinzeng.popularmovies.utils.MovieListJsonUtils;
 import com.example.kuriakinzeng.popularmovies.utils.NetworkUtils;
 
@@ -38,13 +39,13 @@ public class MainActivity extends AppCompatActivity {
         mMovieRecyclerView = (RecyclerView) findViewById(R.id.rv_movie_list);
         GridLayoutManager layoutManager = new GridLayoutManager(this, 3);
         mMovieRecyclerView.setLayoutManager(layoutManager);
-        mMovieListAdapter = new MovieListAdapter();
+        mMovieListAdapter = new MovieListAdapter(this);
         mMovieRecyclerView.setAdapter(mMovieListAdapter);
         
         new FetchMovieList().execute("popular"); 
     }
 
-    public class FetchMovieList extends AsyncTask<String, Void, String[]> {
+    public class FetchMovieList extends AsyncTask<String, Void, Movie[]> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String[] doInBackground(String... params) {
+        protected Movie[] doInBackground(String... params) {
             if(params.length == 0){
                 return null;
             }
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             
             try {
                 String movieListJsonResponse = NetworkUtils.getResponseFromHttpUrl(movieListUrl);
-                String[] movieList = MovieListJsonUtils.getMovieListFromJson(movieListJsonResponse);
+                Movie[] movieList = MovieListJsonUtils.getMovieListFromJson(movieListJsonResponse);
 //                Log.w(TAG, movieListData[0]);
                 return movieList;
             } catch (Exception e) {
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String[] movieList) {
+        protected void onPostExecute(Movie[] movieList) {
             super.onPostExecute(movieList);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             if (movieList != null) {

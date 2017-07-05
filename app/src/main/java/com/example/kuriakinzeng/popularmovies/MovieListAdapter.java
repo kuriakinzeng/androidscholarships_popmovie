@@ -9,7 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.kuriakinzeng.popularmovies.models.Movie;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -21,13 +23,14 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
     private final static String TAG = "Adapter";
     
     private LayoutInflater mLayoutInflater;
-    private String[] mMovieList;
+    private Movie[] mMovieList;
+    private Context context;
     
-//    public MovieListAdapter (Context context) {
-//    
-//    }
+    public MovieListAdapter (Context context) {
+        this.context = context;
+    }
     
-    public void setMovieList (String[] movieList) {
+    public void setMovieList (Movie[] movieList) {
         mMovieList = movieList;
         notifyDataSetChanged();
     }
@@ -42,10 +45,10 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
 
     @Override
     public void onBindViewHolder(MovieListAdapter.MovieHolder holder, int position) {
-        String movieThumbnailPath = mMovieList[position];
-//        Context context = 
+        Movie movie = mMovieList[position];
+        // can be replaced with just context
         Context context = holder.itemView.getContext();
-        Picasso.with(context).load(movieThumbnailPath).into(holder.mMovieThumbnail);
+        Picasso.with(context).load(movie.getPosterPath()).into(holder.mMovieThumbnail);
 //        Log.w(TAG, movie);
 //        holder.mMovieTitle.setText(movie);
     }
@@ -57,17 +60,21 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
         return mMovieList.length;
     }
     
-    public class MovieHolder extends RecyclerView.ViewHolder {
+    public class MovieHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 //        private TextView mMovieTitle;
         private ImageView mMovieThumbnail;
         
         public MovieHolder (View view) {
             super(view);
             mMovieThumbnail = (ImageView) view.findViewById(R.id.iv_movie_thumbnail);
+            mMovieThumbnail.setOnClickListener(this);
         }
-        
-        public void bind () {
-            
+
+        @Override
+        public void onClick(View view) {
+            int adapterPosition = getAdapterPosition();
+            Movie movie = mMovieList[adapterPosition];
+            Toast.makeText(context, movie.getPosterPath() + " is clicked!", Toast.LENGTH_SHORT).show();
         }
     }
 }
