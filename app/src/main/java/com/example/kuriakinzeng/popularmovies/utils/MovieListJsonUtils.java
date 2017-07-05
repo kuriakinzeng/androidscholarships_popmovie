@@ -36,7 +36,7 @@ public final class MovieListJsonUtils {
 //        Log.w(TAG, resultsArray.toString());
         Movie[] movieList = gson.fromJson(resultsArray.toString(), Movie[].class);
         for (Movie movie : movieList) {
-            Log.w(TAG,movie.getPosterPath());
+            Log.w(TAG, movie.toString());
         }
         return movieList;
 

@@ -146,4 +146,24 @@ public class Movie {
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "voteCount=" + voteCount +
+                ", id=" + id +
+                ", video=" + video +
+                ", voteAverage=" + voteAverage +
+                ", title='" + title + '\'' +
+                ", popularity=" + popularity +
+                ", posterPath='" + posterPath + '\'' +
+                ", originalLanguage='" + originalLanguage + '\'' +
+                ", originalTitle='" + originalTitle + '\'' +
+                ", genreIds=" + genreIds +
+                ", backdropPath='" + backdropPath + '\'' +
+                ", adult=" + adult +
+                ", overview='" + overview + '\'' +
+                ", releaseDate='" + releaseDate + '\'' +
+                '}';
+    }
 }
