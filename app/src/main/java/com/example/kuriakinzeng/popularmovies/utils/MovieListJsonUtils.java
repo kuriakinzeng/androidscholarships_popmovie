@@ -28,11 +28,15 @@ public final class MovieListJsonUtils {
         final String IMAGE_SIZE = "w185";
                
         Gson gson = new Gson();
-//        Type type = new TypeToken<Movie[]>() {}.getType();
-        Movie[] movieList = gson.fromJson(json, Movie[].class);
-        for (Movie task : movieList) {
-            System.out.println(task);
-            Log.w(TAG,task.toString());
+        JSONObject jsonObject = new JSONObject(json);
+        if (jsonObject.has(STATUS_CODE)) {
+            return null;
+        }
+        JSONArray resultsArray = jsonObject.getJSONArray("results");
+//        Log.w(TAG, resultsArray.toString());
+        Movie[] movieList = gson.fromJson(resultsArray.toString(), Movie[].class);
+        for (Movie movie : movieList) {
+            Log.w(TAG,movie.getPosterPath());
         }
         return movieList;
 
