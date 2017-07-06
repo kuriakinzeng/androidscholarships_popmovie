@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mMovieRecyclerView;
     private MovieListAdapter mMovieListAdapter;
     private static final String TAG = "Main";
+    private static final int numberOfColumns = 2;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
         
         mMovieRecyclerView = (RecyclerView) findViewById(R.id.rv_movie_list);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 3);
+        GridLayoutManager layoutManager = new GridLayoutManager(this, numberOfColumns);
         mMovieRecyclerView.setLayoutManager(layoutManager);
         mMovieListAdapter = new MovieListAdapter(this);
         mMovieRecyclerView.setAdapter(mMovieListAdapter);
