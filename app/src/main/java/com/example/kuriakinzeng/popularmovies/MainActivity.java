@@ -1,12 +1,18 @@
 package com.example.kuriakinzeng.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -30,8 +36,10 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
     private RecyclerView mMovieRecyclerView;
     private MovieListAdapter mMovieListAdapter;
     private static final String TAG = "Main";
-    private static final int numberOfColumns = 2;
-    private final static String intentName = "movieObject";
+    private static final int NUMBER_OF_COLUMNS = 2;
+    private static final String POPULAR_ENDPOINT = "popular";
+    private static final String TOP_RATED_ENDPOINT = "top_rated";
+    public static final String INTENT_EXTRA_MOVIE_OBJECT = "MOVIE_OBJECT";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +48,12 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
         mMovieRecyclerView = (RecyclerView) findViewById(R.id.rv_movie_list);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, numberOfColumns);
+        GridLayoutManager layoutManager = new GridLayoutManager(this, NUMBER_OF_COLUMNS);
         mMovieRecyclerView.setLayoutManager(layoutManager);
         mMovieListAdapter = new MovieListAdapter(this);
         mMovieRecyclerView.setAdapter(mMovieListAdapter);
         
-        new FetchMovieList().execute("popular"); 
+        new FetchMovieList().execute(POPULAR_ENDPOINT); 
     }
 
     public class FetchMovieList extends AsyncTask<String, Void, Movie[]> {
@@ -99,7 +107,32 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
     public void onClick(Movie movieChosen) {
         Class destinationClass = DetailActivity.class;
         Intent intentToStartDetailActivity = new Intent(this, destinationClass);
-        intentToStartDetailActivity.putExtra(intentName, movieChosen);
+        intentToStartDetailActivity.putExtra(INTENT_EXTRA_MOVIE_OBJECT, movieChosen);
         startActivity(intentToStartDetailActivity);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.sort_by_popular) {
+            mMovieListAdapter.setMovieList(null);
+            new FetchMovieList().execute(POPULAR_ENDPOINT);
+            return true;
+        } 
+        
+        if (id == R.id.sort_by_rating) {
+            mMovieListAdapter.setMovieList(null);
+            new FetchMovieList().execute(TOP_RATED_ENDPOINT);
+            return true;
+        }
+        
+        return super.onOptionsItemSelected(item);
     }
 }

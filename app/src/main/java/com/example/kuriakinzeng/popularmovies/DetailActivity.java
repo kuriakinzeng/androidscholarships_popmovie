@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,7 +18,6 @@ public class DetailActivity extends AppCompatActivity {
     private TextView mSynopsis;
     private TextView mRating;
     private ImageView mThumbnail;
-    private final static String intentName = "movieObject";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +28,11 @@ public class DetailActivity extends AppCompatActivity {
         mSynopsis = (TextView) findViewById(R.id.tv_detail_synopsis);
         mRating = (TextView) findViewById(R.id.tv_detail_rating);
         mThumbnail = (ImageView) findViewById(R.id.iv_detail_thumbnail);
-        Intent intentThatStartedThisActivity = getIntent();
-        if(intentThatStartedThisActivity != null) {
-            if(intentThatStartedThisActivity.hasExtra(intentName)){
-                Movie movieChosen = (Movie) intentThatStartedThisActivity.getSerializableExtra(intentName);
+        Intent intentStarter = getIntent();
+        if(intentStarter != null) {
+            if(intentStarter.hasExtra(MainActivity.INTENT_EXTRA_MOVIE_OBJECT)){
+                Movie movieChosen = (Movie) intentStarter
+                        .getSerializableExtra(MainActivity.INTENT_EXTRA_MOVIE_OBJECT);
                 mTitle.setText(movieChosen.getTitle());
                 mRating.setText(movieChosen.getVoteAverage().toString());
                 mSynopsis.setText(movieChosen.getOverview());
