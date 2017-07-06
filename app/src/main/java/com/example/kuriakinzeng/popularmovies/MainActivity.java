@@ -1,5 +1,6 @@
 package com.example.kuriakinzeng.popularmovies;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.kuriakinzeng.popularmovies.models.Movie;
 import com.example.kuriakinzeng.popularmovies.utils.MovieListJsonUtils;
@@ -22,13 +24,14 @@ import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MovieListAdapter.MovieAdapterOnClickHandler {
     private ProgressBar mLoadingIndicator;
     private TextView mErrorMessageDisplay;
     private RecyclerView mMovieRecyclerView;
     private MovieListAdapter mMovieListAdapter;
     private static final String TAG = "Main";
     private static final int numberOfColumns = 2;
+    private final static String intentName = "movieObject";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
-        
         mMovieRecyclerView = (RecyclerView) findViewById(R.id.rv_movie_list);
         GridLayoutManager layoutManager = new GridLayoutManager(this, numberOfColumns);
         mMovieRecyclerView.setLayoutManager(layoutManager);
@@ -63,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
             try {
                 String movieListJsonResponse = NetworkUtils.getResponseFromHttpUrl(movieListUrl);
                 Movie[] movieList = MovieListJsonUtils.getMovieListFromJson(movieListJsonResponse);
-//                Log.w(TAG, movieListData[0]);
                 return movieList;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -92,5 +93,13 @@ public class MainActivity extends AppCompatActivity {
     private void showDataView() {
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mMovieRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onClick(Movie movieChosen) {
+        Class destinationClass = DetailActivity.class;
+        Intent intentToStartDetailActivity = new Intent(this, destinationClass);
+        intentToStartDetailActivity.putExtra(intentName, movieChosen);
+        startActivity(intentToStartDetailActivity);
     }
 }

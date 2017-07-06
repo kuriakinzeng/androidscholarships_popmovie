@@ -3,13 +3,14 @@ package com.example.kuriakinzeng.popularmovies.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by kuriakinzeng on 7/2/17.
  */
 
-public class Movie {
+public class Movie implements Serializable {
     final String IMAGE_BASE_PATH = "http://image.tmdb.org/t/p/";
     final String IMAGE_SIZE = "w185";
     

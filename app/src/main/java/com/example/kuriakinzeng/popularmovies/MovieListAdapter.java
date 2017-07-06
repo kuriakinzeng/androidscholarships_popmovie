@@ -24,10 +24,14 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
     
     private LayoutInflater mLayoutInflater;
     private Movie[] mMovieList;
-    private Context context;
+    private final MovieAdapterOnClickHandler mClickHandler;
+
+    public interface MovieAdapterOnClickHandler {
+        void onClick(Movie movieChosen);
+    }
     
-    public MovieListAdapter (Context context) {
-        this.context = context;
+    public MovieListAdapter (MovieAdapterOnClickHandler clickHandler) {
+        this.mClickHandler = clickHandler;
     }
     
     public void setMovieList (Movie[] movieList) {
@@ -46,11 +50,8 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
     @Override
     public void onBindViewHolder(MovieListAdapter.MovieHolder holder, int position) {
         Movie movie = mMovieList[position];
-        // can be replaced with just context
         Context context = holder.itemView.getContext();
         Picasso.with(context).load(movie.getPosterPath()).into(holder.mMovieThumbnail);
-//        Log.w(TAG, movie);
-//        holder.mMovieTitle.setText(movie);
     }
 
     @Override
@@ -74,7 +75,8 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
         public void onClick(View view) {
             int adapterPosition = getAdapterPosition();
             Movie movie = mMovieList[adapterPosition];
-            Toast.makeText(context, movie.getPosterPath() + " is clicked!", Toast.LENGTH_SHORT).show();
+            mClickHandler.onClick(movie);
+//            Toast.makeText(context, movie.getPosterPath() + " is clicked!", Toast.LENGTH_SHORT).show();
         }
     }
 }
