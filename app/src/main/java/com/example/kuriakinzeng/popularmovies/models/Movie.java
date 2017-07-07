@@ -165,6 +165,10 @@ public class Movie implements Serializable {
         return releaseDate;
     }
 
+    public String getReleaseYear() {
+        return releaseDate.split("-")[0];
+    }
+
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }

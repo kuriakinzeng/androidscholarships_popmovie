@@ -36,7 +36,7 @@ public class DetailActivity extends AppCompatActivity {
                 mTitle.setText(movieChosen.getTitle());
                 mRating.setText(movieChosen.getVoteAverage().toString());
                 mSynopsis.setText(movieChosen.getOverview());
-                mReleaseDate.setText(movieChosen.getReleaseDate());
+                mReleaseDate.setText(movieChosen.getReleaseYear());
                 Picasso.with(this).load(movieChosen.getPosterPath()).into(mThumbnail);
             }
         }
