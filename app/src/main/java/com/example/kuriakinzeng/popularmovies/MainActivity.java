@@ -60,8 +60,11 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         mMovieRecyclerView.setLayoutManager(layoutManager);
         mMovieListAdapter = new MovieListAdapter(this);
         mMovieRecyclerView.setAdapter(mMovieListAdapter);
-        
+
         mSelectedEndpoint  = POPULAR_ENDPOINT;
+        if (savedInstanceState != null) {
+            mSelectedEndpoint = savedInstanceState.getString(ENDPOINT);
+        }
         LoaderCallbacks<Movie[]> callback = MainActivity.this;
         Bundle bundleForLoader = new Bundle();
         bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
