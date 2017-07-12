@@ -64,7 +64,9 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         mSelectedEndpoint  = POPULAR_ENDPOINT;
         if (savedInstanceState != null) {
             mSelectedEndpoint = savedInstanceState.getString(ENDPOINT);
+            Log.w(TAG, "here");
         }
+        Log.w(TAG, mSelectedEndpoint);
         LoaderCallbacks<Movie[]> callback = MainActivity.this;
         Bundle bundleForLoader = new Bundle();
         bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
@@ -179,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         outState.putString(ENDPOINT, mSelectedEndpoint);
+        super.onSaveInstanceState(outState);
     }
 }
