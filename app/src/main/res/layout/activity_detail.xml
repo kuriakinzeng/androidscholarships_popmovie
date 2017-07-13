@@ -57,6 +57,11 @@
                         android:textSize="@dimen/textMedium"
                         android:textColor="@color/colorWhiteText"/>
                 </LinearLayout>
+                <Button
+                    android:id="@+id/btn_favorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_to_favorites" /> 
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
@@ -73,7 +78,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/textMedium"
                     android:textStyle="bold"
-                    android:text="Overview"/>
+                    android:text="@string/overview"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

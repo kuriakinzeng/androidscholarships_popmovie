@@ -28,6 +28,11 @@
                 android:value="com.example.kuriakinzeng.popularmovies.MainActivity"
                 ></meta-data>
         </activity>
+        <provider
+            android:name=".data.MovieProvider"
+            android:authorities="com.example.kuriakinzeng.popularmovies"
+            android:exported="false"
+            />
     </application>
 
 </manifest>
