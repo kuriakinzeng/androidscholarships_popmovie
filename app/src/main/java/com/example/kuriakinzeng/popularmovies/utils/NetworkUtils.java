@@ -11,9 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
-/**
- * These utilities will be used to communicate with the weather servers.
- */
+
 public final class NetworkUtils {
     
     private static final String MOVIE_BASE_URL = "https://api.themoviedb.org/3/movie";
@@ -21,14 +19,7 @@ public final class NetworkUtils {
     private static final String API_KEY = BuildConfig.API_KEY;
     private static final String PAGE_PARAM = "page";
     private static final String PAGE = "1";
-
-    /**
-     * Builds the URL used to talk to the weather server using a location. This location is based
-     * on the query capabilities of the weather provider that we are using.
-     *
-     * @param endpoint The location that will be queried for.
-     * @return The URL to use to query the weather server.
-     */
+    
     public static URL buildUrl(String endpoint) {
         Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
                 .appendPath(endpoint)
@@ -44,27 +35,11 @@ public final class NetworkUtils {
         
         return url;
     }
-
-    /**
-     * Builds the URL used to talk to the weather server using latitude and longitude of a
-     * location.
-     *
-     * @param lat The latitude of the location
-     * @param lon The longitude of the location
-     * @return The Url to use to query the weather server.
-     */
-    public static URL buildUrl(Double lat, Double lon) {
-        /** This will be implemented in a future lesson **/
+    
+    public static URL buildUrl(String endpoint, Double lon) {
         return null;
     }
-
-    /**
-     * This method returns the entire result from the HTTP response.
-     *
-     * @param url The URL to fetch the HTTP response from.
-     * @return The contents of the HTTP response.
-     * @throws IOException Related to network and stream reading
-     */
+    
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try {

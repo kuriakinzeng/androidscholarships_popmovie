@@ -27,6 +27,8 @@ import android.widget.Toast;
 import com.example.kuriakinzeng.popularmovies.data.FavoriteMovieContract;
 import com.example.kuriakinzeng.popularmovies.data.FavoriteMovieContract.FavoriteMovieEntry;
 import com.example.kuriakinzeng.popularmovies.models.Movie;
+import com.example.kuriakinzeng.popularmovies.models.MovieContainer;
+import com.example.kuriakinzeng.popularmovies.utils.MovieDBService;
 import com.example.kuriakinzeng.popularmovies.utils.MovieListJsonUtils;
 import com.example.kuriakinzeng.popularmovies.utils.NetworkUtils;
 
@@ -38,6 +40,11 @@ import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class MainActivity extends AppCompatActivity implements MovieListAdapter.MovieAdapterOnClickHandler {
     private ProgressBar mLoadingIndicator;
     private TextView mErrorMessageDisplay;
@@ -46,11 +53,12 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
     private String mSelectedEndpoint;
     private static final String TAG = "Main";
     private static final int NUMBER_OF_COLUMNS = 2;
+    private static final String BASE_URL = "https://api.themoviedb.org/3/"; 
     private static final String ENDPOINT = "endpoint";
     private static final String POPULAR_ENDPOINT = "popular";
     private static final String TOP_RATED_ENDPOINT = "top_rated";
     private static final int MOVIE_LIST_LOADER_ID = 0;
-    private static final int FAVORITE_MOVIES_LOADER_ID = 1;
+//    private static final int FAVORITE_MOVIES_LOADER_ID = 1;
     public static final String INTENT_EXTRA_MOVIE_OBJECT = "MOVIE_OBJECT";
     
     @Override
@@ -68,13 +76,11 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         mSelectedEndpoint  = POPULAR_ENDPOINT;
         if (savedInstanceState != null) {
             mSelectedEndpoint = savedInstanceState.getString(ENDPOINT);
-            Log.w(TAG, "here");
         }
-        Log.w(TAG, mSelectedEndpoint);
         Bundle bundleForLoader = new Bundle();
         bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
         getSupportLoaderManager().initLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, movieListLoaderCallbacks);
-        getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
+//        getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
     }
 
     private LoaderCallbacks<Movie[]> movieListLoaderCallbacks = new LoaderCallbacks<Movie[]>() {
@@ -94,13 +100,17 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
 
                 @Override
                 public Movie[] loadInBackground() {
-                    String endpoint = loaderArgs.getString(ENDPOINT);
-                    URL movieListUrl = NetworkUtils.buildUrl(endpoint);
-
+                    Retrofit retrofit = new Retrofit.Builder()
+                            .baseUrl(BASE_URL) 
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .build();
+                    MovieDBService service = retrofit.create(MovieDBService.class);
+                    Call<MovieContainer> call = service.getMovies(mSelectedEndpoint, BuildConfig.API_KEY);
+                    
                     try {
-                        String movieListJsonResponse = NetworkUtils.getResponseFromHttpUrl(movieListUrl);
-                        Movie[] movieList = MovieListJsonUtils.getMovieListFromJson(movieListJsonResponse);
-                        return movieList;
+                        Response<MovieContainer> response = call.execute();
+                        MovieContainer movieContainer = response.body();
+                        return movieContainer.getMovies();
                     } catch (Exception e) {
                         e.printStackTrace();
                         return null;
@@ -221,11 +231,11 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
             return true;
         }
 
-        if (id == R.id.show_favorites) {
+//        if (id == R.id.show_favorites) {
 //            invalidateData();
-            getSupportLoaderManager().restartLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
-            return true;
-        }
+//            getSupportLoaderManager().restartLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
+//            return true;
+//        }
         
         return super.onOptionsItemSelected(item);
     }

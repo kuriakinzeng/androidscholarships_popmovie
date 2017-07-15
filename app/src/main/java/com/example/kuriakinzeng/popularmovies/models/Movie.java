@@ -1,5 +1,8 @@
 package com.example.kuriakinzeng.popularmovies.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +13,7 @@ import java.util.List;
  * Created by kuriakinzeng on 7/2/17.
  */
 
-public class Movie implements Serializable {
+public class Movie implements Parcelable {
     final String IMAGE_BASE_PATH = "http://image.tmdb.org/t/p/";
     final String IMAGE_SIZE = "w185";
     
@@ -191,5 +194,35 @@ public class Movie implements Serializable {
                 ", overview='" + overview + '\'' +
                 ", releaseDate='" + releaseDate + '\'' +
                 '}';
+    }
+
+    public static final Parcelable.Creator<Movie> CREATOR = new Creator<Movie>() {
+        public Movie createFromParcel(Parcel in) {
+            Movie movie = new Movie();
+            movie.id = in.readInt();
+            movie.title = in.readString();
+            movie.posterPath = in.readString();
+            movie.overview = in.readString();
+            movie.voteAverage = in.readDouble();
+            movie.releaseDate = in.readString();
+            return movie;
+        }
+
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(id);
+        parcel.writeString(title);
+        parcel.writeString(posterPath);
+        parcel.writeString(overview);
+        parcel.writeDouble(voteAverage);
+        parcel.writeString(releaseDate);
     }
 }
