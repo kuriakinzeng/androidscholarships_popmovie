@@ -2,10 +2,12 @@ package com.example.kuriakinzeng.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.PersistableBundle;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -22,6 +24,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.kuriakinzeng.popularmovies.data.FavoriteMovieContract;
+import com.example.kuriakinzeng.popularmovies.data.FavoriteMovieContract.FavoriteMovieEntry;
 import com.example.kuriakinzeng.popularmovies.models.Movie;
 import com.example.kuriakinzeng.popularmovies.utils.MovieListJsonUtils;
 import com.example.kuriakinzeng.popularmovies.utils.NetworkUtils;
@@ -34,8 +38,7 @@ import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class MainActivity extends AppCompatActivity implements MovieListAdapter.MovieAdapterOnClickHandler, 
-        LoaderCallbacks<Movie []> {
+public class MainActivity extends AppCompatActivity implements MovieListAdapter.MovieAdapterOnClickHandler {
     private ProgressBar mLoadingIndicator;
     private TextView mErrorMessageDisplay;
     private RecyclerView mMovieRecyclerView;
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
     private static final String POPULAR_ENDPOINT = "popular";
     private static final String TOP_RATED_ENDPOINT = "top_rated";
     private static final int MOVIE_LIST_LOADER_ID = 0;
+    private static final int FAVORITE_MOVIES_LOADER_ID = 1;
     public static final String INTENT_EXTRA_MOVIE_OBJECT = "MOVIE_OBJECT";
     
     @Override
@@ -67,64 +71,105 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
             Log.w(TAG, "here");
         }
         Log.w(TAG, mSelectedEndpoint);
-        LoaderCallbacks<Movie[]> callback = MainActivity.this;
         Bundle bundleForLoader = new Bundle();
         bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
-        getSupportLoaderManager().initLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, callback);
+        getSupportLoaderManager().initLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, movieListLoaderCallbacks);
+        getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
     }
 
-    @Override
-    public Loader<Movie[]> onCreateLoader(int id, final Bundle loaderArgs) {
-        return new AsyncTaskLoader<Movie[]>(this) {
-            Movie[] mMovieList = null;
-            
-            @Override
-            protected void onStartLoading() {
-                if (mMovieList != null) {
-                    deliverResult(mMovieList);
-                } else {
-                    mLoadingIndicator.setVisibility(View.VISIBLE);
-                    forceLoad();
+    private LoaderCallbacks<Movie[]> movieListLoaderCallbacks = new LoaderCallbacks<Movie[]>() {
+        public Loader<Movie[]> onCreateLoader(int id, final Bundle loaderArgs) {
+            return new AsyncTaskLoader<Movie[]>(MainActivity.this) {
+                Movie[] mMovieList = null;
+
+                @Override
+                protected void onStartLoading() {
+                    if (mMovieList != null) {
+                        deliverResult(mMovieList);
+                    } else {
+                        mLoadingIndicator.setVisibility(View.VISIBLE);
+                        forceLoad();
+                    }
                 }
-            }
 
-            @Override
-            public Movie[] loadInBackground() {
-                String endpoint = loaderArgs.getString(ENDPOINT);
-                URL movieListUrl = NetworkUtils.buildUrl(endpoint);
+                @Override
+                public Movie[] loadInBackground() {
+                    String endpoint = loaderArgs.getString(ENDPOINT);
+                    URL movieListUrl = NetworkUtils.buildUrl(endpoint);
 
-                try {
-                    String movieListJsonResponse = NetworkUtils.getResponseFromHttpUrl(movieListUrl);
-                    Movie[] movieList = MovieListJsonUtils.getMovieListFromJson(movieListJsonResponse);
-                    return movieList;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
+                    try {
+                        String movieListJsonResponse = NetworkUtils.getResponseFromHttpUrl(movieListUrl);
+                        Movie[] movieList = MovieListJsonUtils.getMovieListFromJson(movieListJsonResponse);
+                        return movieList;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
                 }
-            }
 
-            public void deliverResult(Movie[] data) {
-                mMovieList = data;
-                super.deliverResult(data);
-            }
-        };
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Movie[]> loader, Movie[] movieList) {
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
-        mMovieListAdapter.setMovieList(movieList);
-        if (movieList != null) {
-            showDataView();
-        } else {
-            showErrorMessage();
+                public void deliverResult(Movie[] data) {
+                    mMovieList = data;
+                    super.deliverResult(data);
+                }
+            };
         }
-    }
 
-    @Override
-    public void onLoaderReset(Loader<Movie[]> loader) {
-        // Not used yet
-    }
+        public void onLoadFinished(Loader<Movie[]> loader, Movie[] movieList) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            mMovieListAdapter.setMovieList(movieList);
+            if (movieList != null) {
+                showDataView();
+            } else {
+                showErrorMessage();
+            }
+        }
+
+        public void onLoaderReset(Loader<Movie[]> loader) {
+            // Not used yet
+        }
+    };
+
+    private LoaderCallbacks<Cursor> cursorLoaderCallbacks = new LoaderCallbacks<Cursor>() {
+        public Loader<Cursor> onCreateLoader(int id, final Bundle loaderArgs) {
+            return new AsyncTaskLoader<Cursor>(MainActivity.this) {
+                Cursor mFavoriteMoviesCursor = null;
+
+                @Override
+                protected void onStartLoading() {
+                    if (mFavoriteMoviesCursor != null) {
+                        deliverResult(mFavoriteMoviesCursor);
+                    } else {
+                        mLoadingIndicator.setVisibility(View.VISIBLE);
+                        forceLoad();
+                    }
+                }
+
+                @Override
+                public Cursor loadInBackground() {
+                    try {
+                        return getContentResolver().query(FavoriteMovieEntry.CONTENT_URI, null, null, null, null);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+
+                public void deliverResult(Cursor data) {
+                    mFavoriteMoviesCursor = data;
+                    super.deliverResult(data);
+                }
+            };
+        }
+
+        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+//            mMovieListAdapter.swapCursor(cursor);
+        }
+
+        public void onLoaderReset(Loader<Cursor> loader) {
+//            mMovieListAdapter.swapCursor(null);
+        }
+    };
 
     private void invalidateData() {
         mMovieListAdapter.setMovieList(null);
@@ -163,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
             invalidateData();
             Bundle bundleForLoader = new Bundle();
             bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
-            getSupportLoaderManager().restartLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, this);
+            getSupportLoaderManager().restartLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, movieListLoaderCallbacks);
             return true;
         } 
         
@@ -172,7 +217,13 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
             invalidateData();
             Bundle bundleForLoader = new Bundle();
             bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
-            getSupportLoaderManager().restartLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, this);
+            getSupportLoaderManager().restartLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, movieListLoaderCallbacks);
+            return true;
+        }
+
+        if (id == R.id.show_favorites) {
+//            invalidateData();
+            getSupportLoaderManager().restartLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
             return true;
         }
         
