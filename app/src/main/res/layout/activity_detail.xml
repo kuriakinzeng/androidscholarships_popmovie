@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        tools:context="com.example.kuriakinzeng.popularmovies.DetailActivity">
+        tools:context="com.example.kuriakinzeng.popularmovies.details.DetailActivity">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -84,6 +84,34 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/tv_detail_synopsis"
                     android:textSize="@dimen/textMedium" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/textMedium"
+                    android:textStyle="bold"
+                    android:layout_marginTop="@dimen/marginLarge"
+                    android:text="@string/trailers"/>
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_trailer_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layoutManager="LinearLayoutManager"
+                    android:layout_marginTop="@dimen/marginSmall"
+                    tools:listitem="@layout/list_trailer_view"/>
+                <TextView
+                    android:id="@+id/tv_error_message_display"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/error_message"
+                    android:visibility="invisible" />
+                <ProgressBar
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:id="@+id/loading_indicator"
+                    android:visibility="invisible"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

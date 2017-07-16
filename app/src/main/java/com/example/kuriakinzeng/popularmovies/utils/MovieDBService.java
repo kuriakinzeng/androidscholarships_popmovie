@@ -18,8 +18,8 @@ public interface MovieDBService {
     Call<MovieContainer> getMovies(@Path("sort") String sort, @Query("api_key") String apiKey);
     
     @GET("movie/{id}/reviews")
-    Call<ReviewContainer> getReviewsById(@Path("id") int movieId, @Query("api_key") String apiKey);
+    Call<ReviewContainer> getReviewsById(@Path("id") Integer movieId, @Query("api_key") String apiKey);
     
-    @GET("movie/{id}/trailers")
-    Call<TrailerContainer> getTrailersById(@Path("id") int movieId, @Query("api_key") String apiKey);
+    @GET("movie/{id}/videos")
+    Call<TrailerContainer> getTrailersById(@Path("id") Integer movieId, @Query("api_key") String apiKey);
 }

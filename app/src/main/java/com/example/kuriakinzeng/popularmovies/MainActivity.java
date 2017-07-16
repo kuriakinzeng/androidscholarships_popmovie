@@ -1,13 +1,7 @@
 package com.example.kuriakinzeng.popularmovies;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.os.PersistableBundle;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -15,30 +9,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.kuriakinzeng.popularmovies.data.FavoriteMovieContract;
 import com.example.kuriakinzeng.popularmovies.data.FavoriteMovieContract.FavoriteMovieEntry;
+import com.example.kuriakinzeng.popularmovies.details.DetailActivity;
 import com.example.kuriakinzeng.popularmovies.models.Movie;
 import com.example.kuriakinzeng.popularmovies.models.MovieContainer;
 import com.example.kuriakinzeng.popularmovies.utils.MovieDBService;
-import com.example.kuriakinzeng.popularmovies.utils.MovieListJsonUtils;
-import com.example.kuriakinzeng.popularmovies.utils.NetworkUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Scanner;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -78,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
             mSelectedEndpoint = savedInstanceState.getString(ENDPOINT);
         }
         Bundle bundleForLoader = new Bundle();
-        bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
+//        bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
         getSupportLoaderManager().initLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, movieListLoaderCallbacks);
 //        getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
     }

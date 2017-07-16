@@ -76,7 +76,6 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.Movi
             int adapterPosition = getAdapterPosition();
             Movie movie = mMovieList[adapterPosition];
             mClickHandler.onClick(movie);
-//            Toast.makeText(context, movie.getPosterPath() + " is clicked!", Toast.LENGTH_SHORT).show();
         }
     }
 }

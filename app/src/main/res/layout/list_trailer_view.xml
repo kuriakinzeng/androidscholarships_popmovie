@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingRight="@dimen/marginSmall"
+    android:clipToPadding="false">
+    <ImageView
+        android:id="@+id/iv_trailer_thumbnail"
+        android:layout_width="@dimen/trailerThumbnailWidth"
+        android:layout_height="@dimen/trailerThumbnailHeight"
+        android:scaleType="centerCrop" />
+</LinearLayout>

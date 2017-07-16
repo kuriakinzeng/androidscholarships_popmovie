@@ -20,7 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DetailActivity"
+        <activity android:name=".details.DetailActivity"
             android:label="@string/title_movie_detail"
             android:parentActivityName="com.example.kuriakinzeng.popularmovies.MainActivity">
             <meta-data

@@ -7,4 +7,6 @@
     <dimen name="textMedium">18sp</dimen>
     <dimen name="textLarge">22sp</dimen>
     <dimen name="textExtraLarge">24sp</dimen>
+    <dimen name="trailerThumbnailWidth">150dp</dimen>
+    <dimen name="trailerThumbnailHeight">100dp</dimen>
 </resources>
