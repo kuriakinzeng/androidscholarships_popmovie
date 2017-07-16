@@ -2,13 +2,13 @@ package com.example.kuriakinzeng.popularmovies.details;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,18 +25,28 @@ import com.example.kuriakinzeng.popularmovies.R;
 import com.example.kuriakinzeng.popularmovies.data.FavoriteMovieContract.FavoriteMovieEntry;
 import com.example.kuriakinzeng.popularmovies.details.TrailerAdapter.TrailerAdapterOnClickHandler;
 import com.example.kuriakinzeng.popularmovies.models.Movie;
-import com.example.kuriakinzeng.popularmovies.models.MovieContainer;
+import com.example.kuriakinzeng.popularmovies.models.Review;
+import com.example.kuriakinzeng.popularmovies.models.ReviewContainer;
 import com.example.kuriakinzeng.popularmovies.models.Trailer;
 import com.example.kuriakinzeng.popularmovies.models.TrailerContainer;
 import com.example.kuriakinzeng.popularmovies.utils.MovieDBService;
 import com.squareup.picasso.Picasso;
+import com.google.gson.Gson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
+
+import java.nio.BufferUnderflowException;
+import java.util.HashSet;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static android.R.attr.button;
 
 public class DetailActivity extends AppCompatActivity implements View.OnClickListener, TrailerAdapterOnClickHandler {
 
@@ -52,10 +62,15 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private ProgressBar mLoadingIndicator;
     private RecyclerView mTrailerRecyclerView;
     private TrailerAdapter mTrailerAdapter;
+    private RecyclerView mReviewRecyclerView;
+    private ReviewAdapter mReviewAdapter;
 
     private static final String BASE_URL = "https://api.themoviedb.org/3/";
     private final static String TAG = "Detail";
-    private static final int DETAIL_ACTIVITY_LOADER_ID = 100;
+    private final static int TRAILER_LOADER_ID = 100;
+    private final static int REVIEW_LOADER_ID = 101;
+    public final static String TRAILERS_OBJECT = "TRAILERS_OBJECT";
+    public final static String REVIEWS_OBJECT = "REVIEWS_OBJECT";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +92,12 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         mTrailerRecyclerView.setLayoutManager(trailerLM);
         mTrailerAdapter = new TrailerAdapter(this);
         mTrailerRecyclerView.setAdapter(mTrailerAdapter);
+
+        mReviewRecyclerView = (RecyclerView) findViewById(R.id.rv_review_list);
+        LinearLayoutManager reviewLM = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mReviewRecyclerView.setLayoutManager(reviewLM);
+        mReviewAdapter = new ReviewAdapter();
+        mReviewRecyclerView.setAdapter(mReviewAdapter);
         
         Intent intentStarter = getIntent();
         if(intentStarter != null) {
@@ -90,7 +111,13 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 mReleaseDate.setText(movieChosen.getReleaseYear());
                 mPosterPath = movieChosen.getPosterPath();
                 Picasso.with(this).load(movieChosen.getPosterPath()).into(mThumbnail);
-                getSupportLoaderManager().initLoader(DETAIL_ACTIVITY_LOADER_ID, null, trailerListLoaderCallbacks);
+                // Try if we can recover trailers from preference
+                if(!loadTrailersFromCache(mId)) {
+                    getSupportLoaderManager().initLoader(TRAILER_LOADER_ID, null, trailerListLoaderCallbacks);
+                }
+                if(!loadReviewsFromCache(mId)) {
+                    getSupportLoaderManager().initLoader(REVIEW_LOADER_ID, null, reviewListLoaderCallbacks);
+                }
             }
         }
     }
@@ -108,8 +135,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onClick(Trailer trailerChosen) {
-        Log.w(TAG, trailerChosen.getName().toString());
-        Toast.makeText(this, trailerChosen.getName().toString(), Toast.LENGTH_LONG);
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(trailerChosen.getUrl())));
     }
 
@@ -120,7 +145,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         values.put(FavoriteMovieEntry.COLUMN_RELEASE_DATE, mReleaseDate.getText().toString());
         values.put(FavoriteMovieEntry.COLUMN_VOTE_AVERAGE, Double.parseDouble(mRating.getText().toString()));
         values.put(FavoriteMovieEntry.COLUMN_POSTER_PATH, mPosterPath);
-        values.put(FavoriteMovieEntry.COLUMN_VIDEO, true); // TODO: not required
+        values.put(FavoriteMovieEntry.COLUMN_VIDEO, true); // TODO: Not required
         Uri uri = getContentResolver().insert(FavoriteMovieEntry.CONTENT_URI, values);
         if (uri != null) {
             Toast.makeText(DetailActivity.this, uri.toString(), Toast.LENGTH_LONG).show();
@@ -178,19 +203,125 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 showErrorMessage();
             }
         }
-
+        
         public void onLoaderReset(Loader<Trailer[]> loader) {
             // Not used yet
         }
+    };
 
-        private void showErrorMessage() {
-            mTrailerRecyclerView.setVisibility(View.INVISIBLE);
-            mErrorMessageDisplay.setVisibility(View.VISIBLE);
+    private LoaderManager.LoaderCallbacks<Review[]> reviewListLoaderCallbacks = new LoaderManager.LoaderCallbacks<Review[]>() {
+        public Loader<Review[]> onCreateLoader(int id, final Bundle loaderArgs) {
+            return new AsyncTaskLoader<Review[]>(DetailActivity.this) {
+                Review[] mReviewList = null;
+
+                @Override
+                protected void onStartLoading() {
+                    if (mReviewList != null) {
+                        deliverResult(mReviewList);
+                    } else {
+                        mLoadingIndicator.setVisibility(View.VISIBLE);
+                        forceLoad();
+                    }
+                }
+
+                @Override
+                public Review[] loadInBackground() {
+                    Retrofit retrofit = new Retrofit.Builder()
+                            .baseUrl(BASE_URL)
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .build();
+                    MovieDBService service = retrofit.create(MovieDBService.class);
+                    Call<ReviewContainer> call = service.getReviewsById(mId, BuildConfig.API_KEY);
+
+                    try {
+                        Response<ReviewContainer> response = call.execute();
+                        ReviewContainer reviewContainer = response.body();
+                        return reviewContainer.getReviews();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+
+                public void deliverResult(Review[] data) {
+                    mReviewList = data;
+                    super.deliverResult(data);
+                }
+            };
         }
 
-        private void showDataView() {
-            mErrorMessageDisplay.setVisibility(View.INVISIBLE);
-            mTrailerRecyclerView.setVisibility(View.VISIBLE);
+        public void onLoadFinished(Loader<Review[]> loader, Review[] reviews) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            mReviewAdapter.setReviewList(reviews);
+            if (reviews != null) {
+                showDataView();
+            } else {
+                showErrorMessage();
+            }
+        }
+
+        public void onLoaderReset(Loader<Review[]> loader) {
+            // Not used yet
         }
     };
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        cacheTrailers();
+        cacheReviews();
+    }
+
+    @Override
+    public void onBackPressed() {
+        cacheTrailers();
+        cacheReviews();
+        super.onBackPressed();
+    }
+
+    private void cacheTrailers(){
+        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        Trailer[] trailers = mTrailerAdapter.getTrailerList();
+        String trailerJson = new Gson().toJson(trailers);
+        editor.putString(TRAILERS_OBJECT+String.valueOf(mId), trailerJson);
+        editor.commit();
+    }
+    
+    private void cacheReviews(){
+        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        Review[] reviews = mReviewAdapter.getReviewList();
+        String reviewJson = new Gson().toJson(reviews);
+        editor.putString(REVIEWS_OBJECT+String.valueOf(mId), reviewJson);
+        editor.commit();
+    }
+
+    private boolean loadTrailersFromCache(Integer movieId){
+        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+        String trailerJson = prefs.getString(TRAILERS_OBJECT + String.valueOf(movieId), null);
+        Trailer[] trailers = new Gson().fromJson(trailerJson, Trailer[].class);
+        mTrailerAdapter.setTrailerList(trailers);
+        return trailers != null && trailers.length > 0;
+    }
+
+    private boolean loadReviewsFromCache(Integer movieId){
+        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+        String reviewJson = prefs.getString(REVIEWS_OBJECT + String.valueOf(movieId), null);
+        Review[] reviews = new Gson().fromJson(reviewJson, Review[].class);
+        mReviewAdapter.setReviewList(reviews);
+        return reviews != null && reviews.length > 0;
+    }
+
+    private void showErrorMessage() {
+        mTrailerRecyclerView.setVisibility(View.INVISIBLE);
+        mReviewRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorMessageDisplay.setVisibility(View.VISIBLE);
+    }
+
+    private void showDataView() {
+        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+        mTrailerRecyclerView.setVisibility(View.VISIBLE);
+        mReviewRecyclerView.setVisibility(View.VISIBLE);
+    }
 }

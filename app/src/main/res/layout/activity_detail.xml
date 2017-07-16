@@ -31,7 +31,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/tv_detail_title"
                     android:textSize="@dimen/textExtraLarge"
-                    android:textColor="@color/colorWhiteText"
+                    android:textColor="@android:color/white"
                     android:textStyle="bold"
                     />
                 <TextView
@@ -39,7 +39,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/textMedium"
-                    android:textColor="@color/colorWhiteText" />
+                    android:textColor="@android:color/white" />
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -49,13 +49,13 @@
                         android:layout_height="wrap_content"
                         android:text="&#9733;"
                         android:textSize="@dimen/textMedium"
-                        android:textColor="@color/colorWhiteText"/>
+                        android:textColor="@android:color/white"/>
                     <TextView
                         android:id="@+id/tv_detail_rating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="@dimen/textMedium"
-                        android:textColor="@color/colorWhiteText"/>
+                        android:textColor="@android:color/white"/>
                 </LinearLayout>
                 <Button
                     android:id="@+id/btn_favorite"
@@ -98,6 +98,20 @@
                     app:layoutManager="LinearLayoutManager"
                     android:layout_marginTop="@dimen/marginSmall"
                     tools:listitem="@layout/list_trailer_view"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/textMedium"
+                    android:textStyle="bold"
+                    android:layout_marginTop="@dimen/marginLarge"
+                    android:text="@string/reviews"/>
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_review_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layoutManager="LinearLayoutManager"
+                    android:layout_marginTop="@dimen/marginSmall"
+                    tools:listitem="@layout/list_review_view"/>
                 <TextView
                     android:id="@+id/tv_error_message_display"
                     android:layout_width="match_parent"

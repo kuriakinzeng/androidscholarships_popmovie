@@ -5,6 +5,7 @@
     <string name="sort_by_rating">Top Rated</string>
     <string name="title_movie_detail">Movie Details</string>
     <string name="overview">Overview</string>
+    <string name="reviews">Reviews</string>
     <string name="trailers">Trailers</string>
     <string name="show_favorites">Favorites</string>
     <string name="add_to_favorites">Add to Favorites</string>

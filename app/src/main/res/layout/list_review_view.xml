@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <ImageView
-        android:id="@+id/trailer_thumbnail"
-        android:layout_width="@dimen/trailerThumbnailWidth"
-        android:layout_height="@dimen/trailerThumbnailHeight"
-        android:scaleType="centerCrop" />
-
-</LinearLayout>
+    android:layout_height="wrap_content"
+    app:cardUseCompatPadding="true">
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_review_author"
+                    android:paddingTop="@dimen/marginMedium"
+                    android:paddingLeft="@dimen/marginMedium"
+                    android:paddingRight="@dimen/marginMedium"
+                    android:textSize="@dimen/textSmall"
+                    android:textColor="@android:color/darker_gray"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/marginMedium"
+                    android:id="@+id/tv_review_content"
+                    android:textSize="@dimen/textSmall" />
+        </LinearLayout>
+</android.support.v7.widget.CardView>

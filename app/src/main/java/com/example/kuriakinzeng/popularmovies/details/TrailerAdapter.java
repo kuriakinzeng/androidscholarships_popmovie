@@ -34,7 +34,11 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerH
         mTrailerList = trailers;
         notifyDataSetChanged();
     }
-    
+
+    public Trailer[] getTrailerList() {
+        return mTrailerList;
+    }
+
     @Override
     public TrailerHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
