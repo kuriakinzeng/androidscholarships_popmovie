@@ -19,7 +19,6 @@ public class FavoriteMovieContract {
                 .appendPath(PATH_FAVORITE_MOVIES)
                 .build();
         public static final String TABLE_NAME = "favorite_movies";
-        public static final String COLUMN_VIDEO = "video";
         public static final String COLUMN_VOTE_AVERAGE = "voteAverage";
         public static final String COLUMN_TITLE = "title";
         public static final String COLUMN_POSTER_PATH = "posterPath";

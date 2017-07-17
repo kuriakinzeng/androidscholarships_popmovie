@@ -83,8 +83,6 @@ public class MovieProvider extends ContentProvider {
         
         int match = sUriMatcher.match(uri);
         Uri returnUri;
-
-//        Log.w(TAG, values.toString());
         
         switch (match) {
             case CODE_FAVORITE_MOVIES:
@@ -106,7 +104,21 @@ public class MovieProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        throw new RuntimeException("We are not implementing delete yet");
+    public int delete(@NonNull Uri uri, @Nullable String where, @Nullable String[] args) {
+        final SQLiteDatabase db = mFavoriteMovieDBHelper.getWritableDatabase();
+        
+        int match = sUriMatcher.match(uri);
+        int rowsDeleted;
+        switch (match) {
+            case CODE_FAVORITE_MOVIES:
+                rowsDeleted = db.delete(FavoriteMovieEntry.TABLE_NAME, FavoriteMovieEntry._ID + " = ? ", args );
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        if (rowsDeleted > 0 && getContext() != null) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsDeleted;
     }
 }

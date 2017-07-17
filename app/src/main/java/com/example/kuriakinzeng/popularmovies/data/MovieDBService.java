@@ -1,4 +1,4 @@
-package com.example.kuriakinzeng.popularmovies.utils;
+package com.example.kuriakinzeng.popularmovies.data;
 
 import com.example.kuriakinzeng.popularmovies.models.MovieContainer;
 import com.example.kuriakinzeng.popularmovies.models.ReviewContainer;

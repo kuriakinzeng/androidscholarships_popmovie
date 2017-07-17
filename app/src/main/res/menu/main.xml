@@ -2,18 +2,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/sort_by_popular"
-        android:orderInCategory="1"
-        android:title="@string/sort_by_popular"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/sort_by_rating"
-        android:orderInCategory="2"
-        android:title="@string/sort_by_rating"
-        app:showAsAction="never"/>
+        android:id="@+id/menu_item_action_parameters"
+        android:title="@string/sort"
+        app:showAsAction="ifRoom|withText">
+        <menu>
+            <item
+                android:id="@+id/sort_by_popular"
+                android:title="@string/sort_by_popular" />
+            <item
+                android:id="@+id/sort_by_rating"
+                android:title="@string/sort_by_rating" />
+        </menu>
+    </item>
     <item
         android:id="@+id/show_favorites"
-        android:orderInCategory="3"
         android:title="@string/show_favorites"
-        app:showAsAction="never"/>
+        app:showAsAction="ifRoom|withText"/>
 </menu>

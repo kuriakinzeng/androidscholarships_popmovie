@@ -14,8 +14,6 @@ import java.util.List;
  */
 
 public class Movie implements Parcelable {
-    final String IMAGE_BASE_PATH = "http://image.tmdb.org/t/p/";
-    final String IMAGE_SIZE = "w185";
     
     @SerializedName("vote_count")
     @Expose
@@ -59,6 +57,19 @@ public class Movie implements Parcelable {
     @SerializedName("release_date")
     @Expose
     private String releaseDate;
+
+    private Movie(){
+        
+    }
+    
+    public Movie(Integer id, Double voteAverage, String title, String posterPath, String overview, String releaseDate) {
+        this.id = id;
+        this.voteAverage = voteAverage;
+        this.title = title;
+        this.posterPath = posterPath;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
+    }
 
     public Integer getVoteCount() {
         return voteCount;
@@ -109,7 +120,7 @@ public class Movie implements Parcelable {
     }
 
     public String getPosterPath() {
-        return IMAGE_BASE_PATH + IMAGE_SIZE + posterPath;
+        return posterPath;
     }
 
     public void setPosterPath(String posterPath) {
@@ -198,13 +209,13 @@ public class Movie implements Parcelable {
 
     public static final Parcelable.Creator<Movie> CREATOR = new Creator<Movie>() {
         public Movie createFromParcel(Parcel in) {
-            Movie movie = new Movie();
-            movie.id = in.readInt();
-            movie.title = in.readString();
-            movie.posterPath = in.readString();
-            movie.overview = in.readString();
-            movie.voteAverage = in.readDouble();
-            movie.releaseDate = in.readString();
+            Integer id = in.readInt();
+            String title = in.readString();
+            String posterPath = in.readString();
+            String overview = in.readString();
+            Double voteAverage = in.readDouble();
+            String releaseDate = in.readString();
+            Movie movie = new Movie(id, voteAverage, title, posterPath, overview, releaseDate);
             return movie;
         }
 

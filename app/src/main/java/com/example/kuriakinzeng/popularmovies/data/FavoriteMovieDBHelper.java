@@ -11,7 +11,7 @@ import com.example.kuriakinzeng.popularmovies.data.FavoriteMovieContract.Favorit
  */
 
 public class FavoriteMovieDBHelper extends SQLiteOpenHelper {
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
     private static final String DATABASE_NAME = "favorite_movie.db";
 
     public FavoriteMovieDBHelper (Context context) {
@@ -26,8 +26,7 @@ public class FavoriteMovieDBHelper extends SQLiteOpenHelper {
                 FavoriteMovieEntry.COLUMN_TITLE + " STRING NOT NULL," + 
                 FavoriteMovieEntry.COLUMN_RELEASE_DATE + " STRING NOT NULL," +
                 FavoriteMovieEntry.COLUMN_VOTE_AVERAGE + " DOUBLE NOT NULL," +
-                FavoriteMovieEntry.COLUMN_OVERVIEW + " STRING NOT NULL," +
-                FavoriteMovieEntry.COLUMN_VIDEO + " BOOLEAN NOT NULL);";
+                FavoriteMovieEntry.COLUMN_OVERVIEW + " STRING NOT NULL);";
         db.execSQL(SQL_CREATE_TABLE);
     }
 

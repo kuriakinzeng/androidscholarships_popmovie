@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,7 +21,7 @@ import com.example.kuriakinzeng.popularmovies.data.FavoriteMovieContract.Favorit
 import com.example.kuriakinzeng.popularmovies.details.DetailActivity;
 import com.example.kuriakinzeng.popularmovies.models.Movie;
 import com.example.kuriakinzeng.popularmovies.models.MovieContainer;
-import com.example.kuriakinzeng.popularmovies.utils.MovieDBService;
+import com.example.kuriakinzeng.popularmovies.data.MovieDBService;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -32,15 +33,16 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
     private TextView mErrorMessageDisplay;
     private RecyclerView mMovieRecyclerView;
     private MovieListAdapter mMovieListAdapter;
-    private String mSelectedEndpoint;
+    private String mSelectedSortBy;
     private static final String TAG = "Main";
     private static final int NUMBER_OF_COLUMNS = 2;
     private static final String BASE_URL = "https://api.themoviedb.org/3/"; 
-    private static final String ENDPOINT = "endpoint";
-    private static final String POPULAR_ENDPOINT = "popular";
-    private static final String TOP_RATED_ENDPOINT = "top_rated";
+    private static final String SORT_BY = "sort_by";
+    private static final String SORT_BY_POPULAR = "popular";
+    private static final String SORT_BY_RATING = "top_rated";
+    private static final String SORT_BY_FAVORITES = "favorites";
     private static final int MOVIE_LIST_LOADER_ID = 0;
-//    private static final int FAVORITE_MOVIES_LOADER_ID = 1;
+    private static final int FAVORITE_MOVIES_LOADER_ID = 1;
     public static final String INTENT_EXTRA_MOVIE_OBJECT = "MOVIE_OBJECT";
     
     @Override
@@ -55,14 +57,18 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         mMovieListAdapter = new MovieListAdapter(this);
         mMovieRecyclerView.setAdapter(mMovieListAdapter);
 
-        mSelectedEndpoint  = POPULAR_ENDPOINT;
+        mSelectedSortBy  = SORT_BY_POPULAR;
         if (savedInstanceState != null) {
-            mSelectedEndpoint = savedInstanceState.getString(ENDPOINT);
+            mSelectedSortBy = savedInstanceState.getString(SORT_BY);
         }
-        Bundle bundleForLoader = new Bundle();
-//        bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
-        getSupportLoaderManager().initLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, movieListLoaderCallbacks);
-//        getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
+        Log.w(TAG, mSelectedSortBy + " " + SORT_BY_FAVORITES + " " + (mSelectedSortBy == SORT_BY_FAVORITES));
+        if(mSelectedSortBy == SORT_BY_FAVORITES) {
+            Log.w(TAG, "here");
+            getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);    
+        } else {
+            Log.w(TAG, "there");
+            getSupportLoaderManager().initLoader(MOVIE_LIST_LOADER_ID, null, movieListLoaderCallbacks);    
+        }
     }
 
     private LoaderCallbacks<Movie[]> movieListLoaderCallbacks = new LoaderCallbacks<Movie[]>() {
@@ -72,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
 
                 @Override
                 protected void onStartLoading() {
+                    Log.w(TAG, "movie list loader callbacks");
                     if (mMovieList != null) {
                         deliverResult(mMovieList);
                     } else {
@@ -87,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
                             .addConverterFactory(GsonConverterFactory.create())
                             .build();
                     MovieDBService service = retrofit.create(MovieDBService.class);
-                    Call<MovieContainer> call = service.getMovies(mSelectedEndpoint, BuildConfig.API_KEY);
+                    Call<MovieContainer> call = service.getMovies(mSelectedSortBy, BuildConfig.API_KEY);
                     
                     try {
                         Response<MovieContainer> response = call.execute();
@@ -128,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
 
                 @Override
                 protected void onStartLoading() {
+                    Log.w(TAG, "favorite movie loader callbacks");
                     if (mFavoriteMoviesCursor != null) {
                         deliverResult(mFavoriteMoviesCursor);
                     } else {
@@ -139,7 +147,8 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
                 @Override
                 public Cursor loadInBackground() {
                     try {
-                        return getContentResolver().query(FavoriteMovieEntry.CONTENT_URI, null, null, null, null);
+                        Cursor cursor = getContentResolver().query(FavoriteMovieEntry.CONTENT_URI, null, null, null, null);
+                        return cursor;
                     } catch (Exception e) {
                         e.printStackTrace();
                         return null;
@@ -155,11 +164,17 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
 
         public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-//            mMovieListAdapter.swapCursor(cursor);
+            mMovieListAdapter.setCursor(cursor);
+            Movie[] movieList = mMovieListAdapter.getMovieList();
+            if (movieList != null) {
+                showDataView();
+            } else {
+                showErrorMessage();
+            }
         }
 
         public void onLoaderReset(Loader<Cursor> loader) {
-//            mMovieListAdapter.swapCursor(null);
+            mMovieListAdapter.setCursor(null);
         }
     };
 
@@ -196,35 +211,40 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.sort_by_popular) {
-            mSelectedEndpoint = POPULAR_ENDPOINT;
+            mSelectedSortBy = SORT_BY_POPULAR;
             invalidateData();
             Bundle bundleForLoader = new Bundle();
-            bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
+            bundleForLoader.putString(SORT_BY, mSelectedSortBy);
+            getSupportLoaderManager().destroyLoader(FAVORITE_MOVIES_LOADER_ID);
             getSupportLoaderManager().restartLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, movieListLoaderCallbacks);
             return true;
         } 
         
         if (id == R.id.sort_by_rating) {
-            mSelectedEndpoint = TOP_RATED_ENDPOINT;
+            mSelectedSortBy = SORT_BY_RATING;
             invalidateData();
             Bundle bundleForLoader = new Bundle();
-            bundleForLoader.putString(ENDPOINT, mSelectedEndpoint);
+            bundleForLoader.putString(SORT_BY, mSelectedSortBy);
+            getSupportLoaderManager().destroyLoader(FAVORITE_MOVIES_LOADER_ID);
             getSupportLoaderManager().restartLoader(MOVIE_LIST_LOADER_ID, bundleForLoader, movieListLoaderCallbacks);
             return true;
         }
 
-//        if (id == R.id.show_favorites) {
-//            invalidateData();
-//            getSupportLoaderManager().restartLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
-//            return true;
-//        }
+        if (id == R.id.show_favorites) {
+            mSelectedSortBy = SORT_BY_FAVORITES;
+            invalidateData();
+            mMovieListAdapter.setCursor(null);
+            getSupportLoaderManager().destroyLoader(MOVIE_LIST_LOADER_ID);
+            getSupportLoaderManager().restartLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
+            return true;
+        }
         
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(ENDPOINT, mSelectedEndpoint);
+        outState.putString(SORT_BY, mSelectedSortBy);
         super.onSaveInstanceState(outState);
     }
 }

@@ -11,7 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -29,24 +28,14 @@ import com.example.kuriakinzeng.popularmovies.models.Review;
 import com.example.kuriakinzeng.popularmovies.models.ReviewContainer;
 import com.example.kuriakinzeng.popularmovies.models.Trailer;
 import com.example.kuriakinzeng.popularmovies.models.TrailerContainer;
-import com.example.kuriakinzeng.popularmovies.utils.MovieDBService;
+import com.example.kuriakinzeng.popularmovies.data.MovieDBService;
 import com.squareup.picasso.Picasso;
 import com.google.gson.Gson;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Text;
-
-import java.nio.BufferUnderflowException;
-import java.util.HashSet;
-import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-
-import static android.R.attr.button;
 
 public class DetailActivity extends AppCompatActivity implements View.OnClickListener, TrailerAdapterOnClickHandler {
 
@@ -57,7 +46,8 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private TextView mRating;
     private ImageView mThumbnail;
     private String mPosterPath;
-    private Button mFavoriteBtn;
+    private Button mAddToFavoriteBtn;
+    private Button mRemoveFromFavoriteBtn;
     private TextView mErrorMessageDisplay;
     private ProgressBar mLoadingIndicator;
     private RecyclerView mTrailerRecyclerView;
@@ -71,6 +61,9 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private final static int REVIEW_LOADER_ID = 101;
     public final static String TRAILERS_OBJECT = "TRAILERS_OBJECT";
     public final static String REVIEWS_OBJECT = "REVIEWS_OBJECT";
+
+    private final String IMAGE_BASE_PATH = "http://image.tmdb.org/t/p/";
+    private final String IMAGE_SIZE = "w185";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,9 +74,14 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         mSynopsis = (TextView) findViewById(R.id.tv_detail_synopsis);
         mRating = (TextView) findViewById(R.id.tv_detail_rating);
         mThumbnail = (ImageView) findViewById(R.id.iv_detail_thumbnail);
+        
         // TODO: Change the button text to Remove from Favorites if the movie has been favorited
-        mFavoriteBtn = (Button) findViewById(R.id.btn_favorite);
-        mFavoriteBtn.setOnClickListener(this);
+        mAddToFavoriteBtn = (Button) findViewById(R.id.btn_add_to_favorites);
+        mAddToFavoriteBtn.setOnClickListener(this);
+        
+        mRemoveFromFavoriteBtn = (Button) findViewById(R.id.btn_remove_from_favorites);
+        mRemoveFromFavoriteBtn.setOnClickListener(this);
+        
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
 
@@ -110,8 +108,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 mSynopsis.setText(movieChosen.getOverview());
                 mReleaseDate.setText(movieChosen.getReleaseYear());
                 mPosterPath = movieChosen.getPosterPath();
-                Picasso.with(this).load(movieChosen.getPosterPath()).into(mThumbnail);
-                // Try if we can recover trailers from preference
+                Picasso.with(this).load(IMAGE_BASE_PATH + IMAGE_SIZE + movieChosen.getPosterPath()).into(mThumbnail);
                 if(!loadTrailersFromCache(mId)) {
                     getSupportLoaderManager().initLoader(TRAILER_LOADER_ID, null, trailerListLoaderCallbacks);
                 }
@@ -125,8 +122,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btn_favorite:
+            case R.id.btn_add_to_favorites:
                 addToFavorites();
+                break;
+            case R.id.btn_remove_from_favorites:
+                removeFromFavorites();
                 break;
             default:
                 break;
@@ -140,16 +140,25 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
     public void addToFavorites () {
         ContentValues values = new ContentValues();
+        values.put(FavoriteMovieEntry._ID, mId.toString());
         values.put(FavoriteMovieEntry.COLUMN_TITLE, mTitle.getText().toString());
         values.put(FavoriteMovieEntry.COLUMN_OVERVIEW, mSynopsis.getText().toString());
         values.put(FavoriteMovieEntry.COLUMN_RELEASE_DATE, mReleaseDate.getText().toString());
         values.put(FavoriteMovieEntry.COLUMN_VOTE_AVERAGE, Double.parseDouble(mRating.getText().toString()));
         values.put(FavoriteMovieEntry.COLUMN_POSTER_PATH, mPosterPath);
-        values.put(FavoriteMovieEntry.COLUMN_VIDEO, true); // TODO: Not required
         Uri uri = getContentResolver().insert(FavoriteMovieEntry.CONTENT_URI, values);
         if (uri != null) {
-            Toast.makeText(DetailActivity.this, uri.toString(), Toast.LENGTH_LONG).show();
-            // TODO: Change the button text to Remove from Favorites
+            Toast.makeText(DetailActivity.this, "Added to Favorites", Toast.LENGTH_LONG).show();
+            this.hideAddToFavoriteBtn();
+        }
+    }
+
+    public void removeFromFavorites () {
+        String[] args = new String[] { mId.toString() }; 
+        int rowsDeleted = getContentResolver().delete(FavoriteMovieEntry.CONTENT_URI, null, args);
+        if (rowsDeleted > 0) {
+            Toast.makeText(DetailActivity.this, "Removed from Favorites", Toast.LENGTH_LONG).show();
+            this.showAddToFavoriteBtn();
         }
     }
 
@@ -323,5 +332,15 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mTrailerRecyclerView.setVisibility(View.VISIBLE);
         mReviewRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    private void showAddToFavoriteBtn() {
+        mRemoveFromFavoriteBtn.setVisibility(View.INVISIBLE);
+        mAddToFavoriteBtn.setVisibility(View.VISIBLE);
+    }
+
+    private void hideAddToFavoriteBtn() {
+        mAddToFavoriteBtn.setVisibility(View.INVISIBLE);
+        mRemoveFromFavoriteBtn.setVisibility(View.VISIBLE);
     }
 }

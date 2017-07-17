@@ -58,10 +58,15 @@
                         android:textColor="@android:color/white"/>
                 </LinearLayout>
                 <Button
-                    android:id="@+id/btn_favorite"
+                    android:id="@+id/btn_add_to_favorites"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/add_to_favorites" /> 
+                    android:text="@string/add_to_favorites" />
+                <Button
+                    android:id="@+id/btn_remove_from_favorites"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/remove_from_favorites" />
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
