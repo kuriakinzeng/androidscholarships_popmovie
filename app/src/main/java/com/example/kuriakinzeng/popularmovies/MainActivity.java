@@ -61,12 +61,9 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
         if (savedInstanceState != null) {
             mSelectedSortBy = savedInstanceState.getString(SORT_BY);
         }
-        Log.w(TAG, mSelectedSortBy + " " + SORT_BY_FAVORITES + " " + (mSelectedSortBy == SORT_BY_FAVORITES));
-        if(mSelectedSortBy == SORT_BY_FAVORITES) {
-            Log.w(TAG, "here");
+        if(mSelectedSortBy.equals(SORT_BY_FAVORITES)) {
             getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);    
         } else {
-            Log.w(TAG, "there");
             getSupportLoaderManager().initLoader(MOVIE_LIST_LOADER_ID, null, movieListLoaderCallbacks);    
         }
     }
@@ -78,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
 
                 @Override
                 protected void onStartLoading() {
-                    Log.w(TAG, "movie list loader callbacks");
                     if (mMovieList != null) {
                         deliverResult(mMovieList);
                     } else {
@@ -135,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements MovieListAdapter.
 
                 @Override
                 protected void onStartLoading() {
-                    Log.w(TAG, "favorite movie loader callbacks");
                     if (mFavoriteMoviesCursor != null) {
                         deliverResult(mFavoriteMoviesCursor);
                     } else {

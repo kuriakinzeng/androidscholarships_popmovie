@@ -54,6 +54,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private TrailerAdapter mTrailerAdapter;
     private RecyclerView mReviewRecyclerView;
     private ReviewAdapter mReviewAdapter;
+    private Toast toast;
 
     private static final String BASE_URL = "https://api.themoviedb.org/3/";
     private final static String TAG = "Detail";
@@ -75,7 +76,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         mRating = (TextView) findViewById(R.id.tv_detail_rating);
         mThumbnail = (ImageView) findViewById(R.id.iv_detail_thumbnail);
         
-        // TODO: Change the button text to Remove from Favorites if the movie has been favorited
         mAddToFavoriteBtn = (Button) findViewById(R.id.btn_add_to_favorites);
         mAddToFavoriteBtn.setOnClickListener(this);
         
@@ -84,6 +84,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
+        toast = new Toast(DetailActivity.this);
 
         mTrailerRecyclerView = (RecyclerView) findViewById(R.id.rv_trailer_list);
         LinearLayoutManager trailerLM = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -148,7 +149,9 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         values.put(FavoriteMovieEntry.COLUMN_POSTER_PATH, mPosterPath);
         Uri uri = getContentResolver().insert(FavoriteMovieEntry.CONTENT_URI, values);
         if (uri != null) {
-            Toast.makeText(DetailActivity.this, "Added to Favorites", Toast.LENGTH_LONG).show();
+            toast.cancel();
+            toast.setText(R.string.added_to_favorites);
+            toast.show();
             this.hideAddToFavoriteBtn();
         }
     }
@@ -157,7 +160,9 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         String[] args = new String[] { mId.toString() }; 
         int rowsDeleted = getContentResolver().delete(FavoriteMovieEntry.CONTENT_URI, null, args);
         if (rowsDeleted > 0) {
-            Toast.makeText(DetailActivity.this, "Removed from Favorites", Toast.LENGTH_LONG).show();
+            toast.cancel();
+            toast.setText(R.string.removed_from_favorites);
+            toast.show();
             this.showAddToFavoriteBtn();
         }
     }
