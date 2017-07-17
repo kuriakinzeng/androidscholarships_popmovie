@@ -3,6 +3,7 @@ package com.example.kuriakinzeng.popularmovies.details;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -54,7 +55,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private TrailerAdapter mTrailerAdapter;
     private RecyclerView mReviewRecyclerView;
     private ReviewAdapter mReviewAdapter;
-    private Toast toast;
 
     private static final String BASE_URL = "https://api.themoviedb.org/3/";
     private final static String TAG = "Detail";
@@ -84,7 +84,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
-        toast = new Toast(DetailActivity.this);
 
         mTrailerRecyclerView = (RecyclerView) findViewById(R.id.rv_trailer_list);
         LinearLayoutManager trailerLM = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -109,6 +108,9 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 mSynopsis.setText(movieChosen.getOverview());
                 mReleaseDate.setText(movieChosen.getReleaseYear());
                 mPosterPath = movieChosen.getPosterPath();
+                if(isFavorited()){
+                    hideAddToFavoriteBtn();
+                }
                 Picasso.with(this).load(IMAGE_BASE_PATH + IMAGE_SIZE + movieChosen.getPosterPath()).into(mThumbnail);
                 if(!loadTrailersFromCache(mId)) {
                     getSupportLoaderManager().initLoader(TRAILER_LOADER_ID, null, trailerListLoaderCallbacks);
@@ -149,9 +151,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         values.put(FavoriteMovieEntry.COLUMN_POSTER_PATH, mPosterPath);
         Uri uri = getContentResolver().insert(FavoriteMovieEntry.CONTENT_URI, values);
         if (uri != null) {
-            toast.cancel();
-            toast.setText(R.string.added_to_favorites);
-            toast.show();
+            Toast.makeText(DetailActivity.this, R.string.added_to_favorites, Toast.LENGTH_SHORT).show();
             this.hideAddToFavoriteBtn();
         }
     }
@@ -160,10 +160,24 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         String[] args = new String[] { mId.toString() }; 
         int rowsDeleted = getContentResolver().delete(FavoriteMovieEntry.CONTENT_URI, null, args);
         if (rowsDeleted > 0) {
-            toast.cancel();
-            toast.setText(R.string.removed_from_favorites);
-            toast.show();
+            Toast.makeText(DetailActivity.this, R.string.removed_from_favorites, Toast.LENGTH_SHORT).show();
             this.showAddToFavoriteBtn();
+        }
+    }
+
+    private boolean isFavorited() {
+        Cursor c = getContentResolver().query(
+                FavoriteMovieEntry.CONTENT_URI,
+                new String[]{ FavoriteMovieEntry._ID },
+                FavoriteMovieEntry._ID + " = " + mId,
+                null,
+                null);
+
+        if (c != null && c.moveToFirst()) {
+            c.close();
+            return true;
+        } else {
+            return false;
         }
     }
 
